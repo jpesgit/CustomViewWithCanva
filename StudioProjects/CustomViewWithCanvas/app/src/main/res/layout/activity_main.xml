@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.joaopedrosilva.customviewwithcanvas.MainActivity">
+
+
+    <com.example.joaopedrosilva.customviewwithcanvas.Graph
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:barWidth="6dp"
+        app:barHeight="100dp"
+        app:baseColor="@android:color/holo_red_dark"/>
+
+</android.support.constraint.ConstraintLayout>

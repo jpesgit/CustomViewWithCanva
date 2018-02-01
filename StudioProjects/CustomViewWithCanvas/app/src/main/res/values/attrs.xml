@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="GraphBar">
+        <attr name="barHeight" format="dimension" />
+        <attr name="barWidth" format="dimension" />
+    </declare-styleable>
+</resources>
