@@ -10,8 +10,7 @@
     <com.example.joaopedrosilva.customviewwithcanvas.Graph
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:barWidth="6dp"
-        app:barHeight="100dp"
-        app:baseColor="@android:color/holo_red_dark"/>
+        app:barWidth="10dp"
+        app:barHeight="100dp"/>
 
 </android.support.constraint.ConstraintLayout>
