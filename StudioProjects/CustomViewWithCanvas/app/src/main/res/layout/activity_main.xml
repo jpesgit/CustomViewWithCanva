@@ -11,6 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:barWidth="10dp"
-        app:barHeight="100dp"/>
+        app:barHeight="150dp"/>
 
 </android.support.constraint.ConstraintLayout>
