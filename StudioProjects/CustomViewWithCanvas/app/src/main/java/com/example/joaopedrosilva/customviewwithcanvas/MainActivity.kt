@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
             arrayListOf(
                 Graph.Points("160", 1f),
                 Graph.Points("60", 0.5f),
-                Graph.Points("160", 0.2f)
+                Graph.Points("20", 0.2f)
             )
         )
     }
