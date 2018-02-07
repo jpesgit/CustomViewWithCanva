@@ -12,10 +12,12 @@ class Graph : View {
     private var barHeight: Float = 0f
     private var textSizeMessage: Int = 0
     private var barWidth: Int = 0
-    private var margin: Int = 0
+    private var margin: Float = 0f
     private var listColor = intArrayOf()
     data class Points(val name: String, val position: Float)
-    private var listPoints = arrayListOf<Points>()
+    private var listPoints = arrayListOf<Points>(Graph.Points("160", 1f),
+        Graph.Points("60", 0.5f),
+        Graph.Points("20", 0.2f))
     data class Labels(val name: String, val position: Float)
     private val listLabels = listOf<Labels>(
         Labels("Pico do exercício", 0.75f),
@@ -38,18 +40,18 @@ class Graph : View {
     )
             : super(context, attrs, defStyleAttr, defStyleRes) {
             this.listColor = intArrayOf(
-                context.resources.getColor(android.R.color.holo_red_light),
-                context.resources.getColor(android.R.color.holo_orange_dark),
-                context.resources.getColor(android.R.color.holo_orange_light),
-                context.resources.getColor(android.R.color.holo_green_light),
-                context.resources.getColor(android.R.color.holo_blue_light)
+                ContextCompat.getColor(context,android.R.color.holo_red_light),
+                ContextCompat.getColor(context,android.R.color.holo_orange_dark),
+                ContextCompat.getColor(context,android.R.color.holo_orange_light),
+                ContextCompat.getColor(context,android.R.color.holo_green_light),
+                ContextCompat.getColor(context,android.R.color.holo_blue_light)
             )
             this.intervals = floatArrayOf(0.24f, 0.54f, 0.81f, 0.88f, 1f)
 
         //read xml attributes
         val ta = context.theme.obtainStyledAttributes(attrs, R.styleable.GraphBar, 0, 0)
-        barWidth = ta.getDimensionPixelSize(R.styleable.GraphBar_barWidth, 0)
-        margin = ta.getDimensionPixelSize(R.styleable.GraphBar_margin, 10)
+        barWidth = ta.getDimensionPixelSize(R.styleable.GraphBar_barWidth, 10)
+        margin = ta.getFloat(R.styleable.GraphBar_margin, 10f)
         textSizeMessage = ta.getDimensionPixelSize(R.styleable.GraphBar_textSizeMessage, 20)
 
         ta.recycle()
@@ -88,7 +90,7 @@ class Graph : View {
                 val widthMin = if (bounds.width() < 32) 32 else bounds.width()
                 val heightMin = if (bounds.height() < 16) 16 else bounds.height()
                 val y = (barHeight + margin) - ((barHeight * points.position) - (heightMin / 2))
-                val x = (((width / 2) - margin - barWidth) - widthMin).toFloat()
+                val x = ((width / 2) - margin - barWidth) - widthMin
 
                 paint.reset()
                 paint.apply {
@@ -150,13 +152,11 @@ class Graph : View {
 
     private fun drawBarColor(canvas: Canvas) {
 
-        val startEndOffset = (width + margin - barWidth) / 2
-        var y0 = margin.toFloat()
-        val x1 = (width - startEndOffset).toFloat()
+        val x0 = (width + margin - barWidth) / 2
+        var y0 = margin
+        val x1 = width - x0
 
-        val x0 = (0 + startEndOffset).toFloat()
-
-        paint.apply {
+        this.paint.apply {
             reset()
             isAntiAlias = true
         }
