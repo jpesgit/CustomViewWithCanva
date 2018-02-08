@@ -2,7 +2,7 @@
     <declare-styleable name="GraphBar">
         <attr name="barHeight" format="dimension" />
         <attr name="barWidth" format="dimension" />
-        <attr name="margin" format="float" />
+        <attr name="margin" format="dimension" />
         <attr name="textSizeMessage" format="dimension" />
     </declare-styleable>
 </resources>

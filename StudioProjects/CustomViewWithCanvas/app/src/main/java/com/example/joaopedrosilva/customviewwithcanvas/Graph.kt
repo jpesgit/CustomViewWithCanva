@@ -2,32 +2,59 @@ package com.example.joaopedrosilva.customviewwithcanvas
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Rect
+import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.view.View
 
 @Suppress("PrivatePropertyName", "LocalVariableName", "JoinDeclarationAndAssignment")
 class Graph : View {
-    private var barHeight: Float = 0f
-    private var textSizeMessage: Int = 0
-    private var barWidth: Int = 0
-    private var margin: Float = 0f
-    private var listColor = intArrayOf()
-    data class Points(val name: String, val position: Float)
-    private var listPoints = arrayListOf<Points>(Graph.Points("160", 1f),
-        Graph.Points("60", 0.5f),
-        Graph.Points("20", 0.2f))
-    data class Labels(val name: String, val position: Float)
-    private val listLabels = listOf<Labels>(
-        Labels("Pico do exercício", 0.75f),
-        Labels("Exercício cardio", 0.50f),
-        Labels("Queima Gordura", 0.25f)
+
+    class Labels(
+        val name: String,
+        val position: Float
     )
+
+    private val textSizeMessage: Int
+    private val barWidth: Int
+    private val margin: Float
+    private val listColor: IntArray
+    private val intervals: FloatArray
+
+    private var barHeight: Float =0f
+
+    data class Points(val name: String, val position: Float)
+
+    private var listPoints = arrayListOf(
+        Graph.Points("160", 1f),
+    Graph.Points("60", 0.5f),
+    Graph.Points("20", 0.2f)
+    )
+
+    private val listLabels = listOf(
+        Labels("Pico do exercício", 0.75f),
+    Labels("Exercício cardio", 0.50f),
+    Labels("Queima Gordura", 0.25f)
+    )
+
     private val paint = Paint()
-    private var intervals: FloatArray = floatArrayOf()
     private var path: Path = Path()
     private var rect = Rect()
+
+    init {
+        this.listColor = intArrayOf(
+            colorFromRes(android.R.color.holo_red_light),
+            colorFromRes(android.R.color.holo_orange_dark),
+            colorFromRes(android.R.color.holo_orange_light),
+            colorFromRes(android.R.color.holo_green_light),
+            colorFromRes(android.R.color.holo_blue_light)
+        )
+        this.intervals = floatArrayOf(0.24f, 0.54f, 0.81f, 0.88f, 1f)
+    }
 
     @SuppressLint("NewApi")
     @Suppress("ConvertSecondaryConstructorToPrimary")
@@ -39,23 +66,13 @@ class Graph : View {
         defStyleRes: Int = 0
     )
             : super(context, attrs, defStyleAttr, defStyleRes) {
-            this.listColor = intArrayOf(
-                ContextCompat.getColor(context,android.R.color.holo_red_light),
-                ContextCompat.getColor(context,android.R.color.holo_orange_dark),
-                ContextCompat.getColor(context,android.R.color.holo_orange_light),
-                ContextCompat.getColor(context,android.R.color.holo_green_light),
-                ContextCompat.getColor(context,android.R.color.holo_blue_light)
-            )
-            this.intervals = floatArrayOf(0.24f, 0.54f, 0.81f, 0.88f, 1f)
 
-        //read xml attributes
         val ta = context.theme.obtainStyledAttributes(attrs, R.styleable.GraphBar, 0, 0)
         barWidth = ta.getDimensionPixelSize(R.styleable.GraphBar_barWidth, 10)
-        margin = ta.getFloat(R.styleable.GraphBar_margin, 10f)
+        margin = ta.getDimensionPixelSize(R.styleable.GraphBar_margin, 10).toFloat()
         textSizeMessage = ta.getDimensionPixelSize(R.styleable.GraphBar_textSizeMessage, 20)
 
         ta.recycle()
-
     }
 
 
@@ -65,7 +82,8 @@ class Graph : View {
             return
         }
         barHeight = height.toFloat() - (margin * 2) - paddingBottom - paddingTop
-        drawBarColor(canvas)
+        val leftMargin= ((width -  barWidth) / 2).toFloat()
+        drawBarColor(canvas, leftMargin, margin, width - leftMargin)
         drawMessages(canvas)
         drawPoints(canvas)
     }
@@ -73,60 +91,55 @@ class Graph : View {
 
     @SuppressLint("ResourceType")
     private fun drawPoints(canvas: Canvas) {
+        val labelPaint = Paint()
+        labelPaint.apply {
+            isAntiAlias = true
+            textSize = 20f
+            color = ContextCompat.getColor(context, android.R.color.white)
+            textAlign = Paint.Align.LEFT
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        }
+        for (points in listPoints) {
+            val bounds = Rect()
+            labelPaint.getTextBounds(points.name, 0, points.name.length, bounds)
 
-        if (listPoints != null) {
-            val labelPaint = Paint()
-            labelPaint.apply {
+            val widthMin = if (bounds.width() < 32) 32 else bounds.width()
+            val heightMin = if (bounds.height() < 16) 16 else bounds.height()
+            val y = (barHeight + margin) - ((barHeight * points.position) - (heightMin / 2))
+            val x = ((width / 2) - margin - barWidth) - widthMin
+
+            paint.reset()
+            paint.apply {
                 isAntiAlias = true
                 textSize = 20f
-                color = ContextCompat.getColor(context, android.R.color.white)
+                color = ContextCompat.getColor(context, android.R.color.darker_gray)
                 textAlign = Paint.Align.LEFT
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
             }
-            for (points in listPoints) {
-                val bounds = Rect()
-                labelPaint.getTextBounds(points.name, 0, points.name.length, bounds)
+            path.reset()
 
-                val widthMin = if (bounds.width() < 32) 32 else bounds.width()
-                val heightMin = if (bounds.height() < 16) 16 else bounds.height()
-                val y = (barHeight + margin) - ((barHeight * points.position) - (heightMin / 2))
-                val x = ((width / 2) - margin - barWidth) - widthMin
+            val halfTriangle = ((heightMin + 6) / 2).toFloat()
 
-                paint.reset()
-                paint.apply {
-                    isAntiAlias = true
-                    textSize = 20f
-                    color = ContextCompat.getColor(context, android.R.color.darker_gray)
-                    textAlign = Paint.Align.LEFT
-                    typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-                }
-                path.reset()
-
-                val halfTriangle=((heightMin+6)/2).toFloat()
-
-                path.apply {
-                    moveTo(heightMin.toFloat(), 0f)
-                    lineTo(0f, halfTriangle)
-                    lineTo(0f, -halfTriangle)
-                    close()
-                    offset(x + 35, y - ((heightMin-2)/2))
-                }
-                canvas.drawPath(path, paint)
-
-                rect = Rect(
-                    x.toInt() - 4,
-                    (y.toInt()-2) - heightMin,
-                    (x.toInt() + 4) + widthMin,
-                    y.toInt() + 4
-                )
-
-                canvas.drawRect(rect, paint)
-                canvas.drawText(points.name, x, y, labelPaint)
-
+            path.apply {
+                moveTo(heightMin.toFloat(), 0f)
+                lineTo(0f, halfTriangle)
+                lineTo(0f, -halfTriangle)
+                close()
+                offset(x + 35, y - ((heightMin - 2) / 2))
             }
+            canvas.drawPath(path, paint)
+
+            rect = Rect(
+                x.toInt() - 4,
+                (y.toInt() - 2) - heightMin,
+                (x.toInt() + 4) + widthMin,
+                y.toInt() + 4
+            )
+
+            canvas.drawRect(rect, paint)
+            canvas.drawText(points.name, x, y, labelPaint)
+
         }
-
-
     }
 
     private fun drawMessages(canvas: Canvas) {
@@ -150,11 +163,9 @@ class Graph : View {
         }
     }
 
-    private fun drawBarColor(canvas: Canvas) {
+    private fun drawBarColor(canvas: Canvas, x0:Float,y0:Float, x1:Float) {
 
-        val x0 = (width + margin - barWidth) / 2
-        var y0 = margin
-        val x1 = width - x0
+        var y0 = y0
 
         this.paint.apply {
             reset()
@@ -162,8 +173,7 @@ class Graph : View {
         }
 
         listColor.forEachIndexed { index, color ->
-            val y1 =
-                (intervals[index] * barHeight) + margin
+            val y1 = (intervals[index] * barHeight) + margin
 
             paint.apply {
                 this.color = color
@@ -177,5 +187,10 @@ class Graph : View {
     fun setPoints(list: ArrayList<Points>) {
         this.listPoints = list
         invalidate()
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun View.colorFromRes(color: Int): Int {
+        return ContextCompat.getColor(context, color)
     }
 }
